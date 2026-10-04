@@ -115,6 +115,7 @@ const settingsSchema = {
     youtube: { default: 'youtube' as 'youtube' | 'invidious' | 'piped' },
     invidious: { default: undefined as string | undefined },
     piped: { default: undefined as string | undefined },
+    redgifs: { default: false },
   },
   dock: {
     paletteHotkey: { default: '/' },

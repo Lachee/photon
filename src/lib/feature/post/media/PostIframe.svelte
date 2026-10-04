@@ -8,7 +8,7 @@
     PuzzlePiece,
     VideoCamera,
   } from 'svelte-hero-icons/dist'
-  import { type IframeType, optimizeImageURL } from '../helpers'
+  import { type IframeType, isRedgifsLink, optimizeImageURL } from '../helpers'
 
   const youtubeDomain = (place: 'youtube' | 'invidious' | 'piped') => {
     switch (place) {
@@ -65,6 +65,12 @@
       }
     }
 
+    if (type == 'redgifs') {
+      const id = isRedgifsLink(inputUrl)?.[1]
+
+      if (id) return `https://www.redgifs.com/ifr/${id.toLowerCase()}`
+    }
+
     return ''
   }
 
@@ -79,6 +85,12 @@
         return {
           icon: VideoCamera,
           text: 'YouTube Video',
+        }
+      }
+      case 'redgifs': {
+        return {
+          icon: VideoCamera,
+          text: 'RedGIFs',
         }
       }
       case 'video': {
@@ -103,6 +115,7 @@
     opened?: boolean
     autoplay?: boolean
     title?: string
+    blur?: boolean
     class?: string
   }
 
@@ -111,10 +124,15 @@
     thumbnail = undefined,
     url,
     title,
+    blur = false,
     opened = $bindable(!settings.embeds.clickToView),
     autoplay = settings.embeds.clickToView,
     class: clazz = '',
   }: Props = $props()
+
+  // Callers like the post page force embeds open, but RedGIFs embeds should still respect click to view.
+  // svelte-ignore state_referenced_locally
+  if (type == 'redgifs' && settings.embeds.clickToView) opened = false
 
   let data = $derived(typeData(type))
   let embedUrl = $derived(urlToEmbed(url))
@@ -139,6 +157,9 @@
         allowfullscreen
       ></iframe>
     {/if}
+    {#if blur}
+      <div role="presentation" class="nsfw-cover"></div>
+    {/if}
   {:else}
     <button onclick={() => (opened = true)} class="iframe-preview">
       <div role="presentation" class="preview-start">
@@ -149,7 +170,10 @@
       {#if thumbnail}
         <img
           src={optimizeImageURL(thumbnail, 512)}
-          class="absolute top-0 left-0 -z-10 w-full object-cover h-full mask-b-from-0 brightness-75"
+          class={[
+            'absolute top-0 left-0 -z-10 w-full object-cover h-full mask-b-from-0 brightness-75',
+            blur && 'blur-3xl',
+          ]}
           alt=""
         />
       {:else}
@@ -189,6 +213,19 @@
     & > * {
       width: 100%;
       height: 100%;
+    }
+
+    /* Blurs NSFW embeds until hovered */
+    .nsfw-cover {
+      position: absolute;
+      inset: 0;
+      backdrop-filter: blur(var(--blur-3xl));
+      transition: opacity 300ms var(--ease-cubic);
+    }
+
+    &:hover .nsfw-cover {
+      opacity: 0;
+      pointer-events: none;
     }
 
     .iframe-preview {

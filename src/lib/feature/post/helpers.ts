@@ -2,6 +2,7 @@ import { env } from '$env/dynamic/public'
 import { client } from '$lib/api/client.svelte'
 import type { CommentView, PersonView, Post } from '$lib/api/types'
 import { profile } from '$lib/app/auth'
+import { settings } from '$lib/app/settings.svelte'
 import {
   canParseUrl,
   findClosestNumber,
@@ -73,6 +74,15 @@ export const isYoutubeLink = (url?: string): RegExpMatchArray | null => {
   return url?.match?.(YOUTUBE_REGEX)
 }
 
+const REDGIFS_REGEX =
+  /^(?:https?:\/\/)?(?:www\.|v3\.)?redgifs\.com\/(?:watch|ifr)\/(\w+)/i
+
+export const isRedgifsLink = (url?: string): RegExpMatchArray | null => {
+  if (!url) return null
+
+  return url?.match?.(REDGIFS_REGEX)
+}
+
 export function postLink(post: Post) {
   return `/post/${encodeURIComponent(profile.current.instance)}/${post.id}`
 }
@@ -85,7 +95,7 @@ export type MediaType =
   | 'poll'
   | 'event'
   | 'none'
-export type IframeType = 'youtube' | 'video' | 'none'
+export type IframeType = 'youtube' | 'redgifs' | 'video' | 'none'
 
 export function mediaType(post?: Post | string): MediaType {
   if (!post) return 'none'
@@ -109,6 +119,7 @@ export function mediaType(post?: Post | string): MediaType {
   if (isImage(url)) return 'image'
   if (isVideo(url)) return 'iframe'
   if (isYoutubeLink(url)) return 'iframe'
+  if (settings.embeds.redgifs && isRedgifsLink(url)) return 'iframe'
   if (canParseUrl(url)) return 'embed'
   return 'none'
 }
@@ -116,6 +127,7 @@ export function mediaType(post?: Post | string): MediaType {
 export function iframeType(url: string): IframeType {
   if (isVideo(url)) return 'video'
   if (isYoutubeLink(url)) return 'youtube'
+  if (settings.embeds.redgifs && isRedgifsLink(url)) return 'redgifs'
   return 'none'
 }
 

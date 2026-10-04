@@ -65,4 +65,10 @@
       />
     </Setting>
   {/if}
+  <ToggleSetting
+    icon={VideoCamera}
+    title={$t('settings.embeds.redgifs.title')}
+    description={$t('settings.embeds.redgifs.description')}
+    bind:checked={settings.embeds.redgifs}
+  />
 </CommonList>

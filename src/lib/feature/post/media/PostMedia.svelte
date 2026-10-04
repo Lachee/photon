@@ -40,6 +40,7 @@
     url={post.url}
     {opened}
     title={post.name}
+    {blur}
     {...rest}
   />
 {:else if type == 'poll' && post.poll && view == 'cozy'}

@@ -877,6 +877,10 @@
                 "invidious": "Invidious instance",
                 "piped": "Piped instance",
                 "description": "The instance to embed YouTube content in."
+            },
+            "redgifs": {
+                "title": "RedGIFs",
+                "description": "Embed RedGIFs videos in posts."
             }
         },
         "lemmy": {
